@@ -66,7 +66,7 @@ const login = async (req, res) => {
   }
 };
 
-// Verify 2FA
+// Verify 
 const verify2FA = async (req, res) => {
   const { email, token } = req.body;
 
@@ -82,10 +82,6 @@ const verify2FA = async (req, res) => {
       token: token,
       window: 1,
     });
-    console.log("User Secret: ", user.twoFactorSecret);
-    console.log("Token Provided: ", token);
-    console.log("Is Valid: ", isValid);
-
 
     if (!isValid) {
       return res.status(400).json({ error: 'Invalid 2FA code' });

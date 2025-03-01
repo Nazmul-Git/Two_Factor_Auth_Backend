@@ -5,7 +5,7 @@ const jwt = require('jsonwebtoken');
 
 const router = express.Router();
 
-// Local authentication routes
+// routes
 router.post('/register', register);
 router.post('/login', login);
 router.post('/verify', verify2FA);

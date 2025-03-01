@@ -2,7 +2,7 @@
 const mongoose = require('mongoose');
 
 const connectDB = async () => {
-    const MONGODB_URI = `mongodb+srv://nazmul:nazmul%401357@cluster0.nqiml.mongodb.net/todoappDB?retryWrites=true&w=majority&appName=Cluster0`;
+    const MONGODB_URI = process.env.MONGODB_URI;
     try {
         await mongoose.connect(MONGODB_URI);
         console.log('MongoDB connected');
