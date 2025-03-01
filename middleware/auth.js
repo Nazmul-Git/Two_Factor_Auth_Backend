@@ -4,8 +4,6 @@ const jwt = require('jsonwebtoken');
 const speakeasy = require('speakeasy');
 const nodemailer = require('nodemailer');
 const { totp } = require('otplib');
-const { OAuth2Client } = require('google-auth-library');
-const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 // Register
 const register = async (req, res) => {
@@ -39,6 +37,7 @@ const login = async (req, res) => {
       secret: user.twoFactorSecret,
       digits: 6,
     });
+    console.log(mailCode)
 
     const transporter = nodemailer.createTransport({
       service: 'gmail',
@@ -77,11 +76,15 @@ const verify2FA = async (req, res) => {
       return res.status(400).json({ error: 'User not found' });
     }
 
+    console.log("User found, verifying token...", token);
+
     const isValid = totp.verify({
       secret: user.twoFactorSecret,
       token: token,
-      window: 1,
+      window: 3, 
     });
+
+    console.log(`Token verification result: ${isValid}`);
 
     if (!isValid) {
       return res.status(400).json({ error: 'Invalid 2FA code' });
@@ -100,41 +103,4 @@ const verify2FA = async (req, res) => {
 };
 
 
-
-// Google Login
-const googleLogin = async (req, res) => {
-  const { tokenId } = req.body;
-
-  if (!tokenId) {
-    return res.status(400).json({ error: 'Token ID is required.' });
-  }
-
-  try {
-    const ticket = await googleClient.verifyIdToken({
-      idToken: tokenId,
-      audience: process.env.GOOGLE_CLIENT_ID,
-    });
-
-    const payload = ticket.getPayload();
-    const email = payload.email;
-
-    let user = await User.findOne({ googleId: payload.sub });
-
-    if (!user) {
-      user = new User({
-        googleId: payload.sub,
-        email: email,
-      });
-      await user.save();
-    }
-
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
-
-    res.json({ token, requires2FA: false, email });
-  } catch (error) {
-    console.error('Google login error:', error);
-    res.status(400).json({ error: 'Google login failed. Please try again.' });
-  }
-};
-
-module.exports = { register, login, verify2FA, googleLogin };
+module.exports = { register, login, verify2FA };
