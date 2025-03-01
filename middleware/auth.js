@@ -76,7 +76,6 @@ const verify2FA = async (req, res) => {
       return res.status(400).json({ error: 'User not found' });
     }
 
-    console.log("User found, verifying token...", token);
 
     const isValid = totp.verify({
       secret: user.twoFactorSecret,
@@ -84,7 +83,6 @@ const verify2FA = async (req, res) => {
       window: 3, 
     });
 
-    console.log(`Token verification result: ${isValid}`);
 
     if (!isValid) {
       return res.status(400).json({ error: 'Invalid 2FA code' });
@@ -97,7 +95,6 @@ const verify2FA = async (req, res) => {
       token: jwtToken,
     });
   } catch (err) {
-    console.error('Error:', err);
     res.status(500).json({ error: 'Internal server error' });
   }
 };
